@@ -1,0 +1,276 @@
+openapi: 3.0.0
+info:
+  title: Assignment api
+  description: Assignment API 규격서
+  version: 4.0.0
+servers:
+  - url: http://localhost:8080
+    description: local
+tags:
+  - name: Auth
+    description: 인증 API
+  - name: Menu
+    description: 메뉴 API
+paths:
+
+  /auth/v1/login:
+    post:
+      tags:
+        - Auth
+      summary: 로그인 API
+      description: userId, password 를 입력 받아 token을 발행한다.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - password
+              properties:
+                userId:
+                  type: string
+                  description: 사용자 ID
+                  default: 'test1234'
+                password:
+                  type: string
+                  description: 사용자 비밀번호
+                  default: '1234'
+      responses:
+        201:
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                properties:
+                  token:
+                    type: string
+                    description: Jwt token
+                  refreshToken:
+                    type: string
+                    description: Jwt token 만료시 해당 토큰으로 토큰 재발급
+        500:
+          $ref: '#/components/responses/ServerError'
+
+  /menu/v1:
+    post:
+      tags:
+        - Menu
+      summary: 메뉴 등록 API
+      description: 메뉴를 등록 처리 한다.
+      security:
+        - bearerAuth: [ bearer ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+              properties:
+                parentIdx:
+                  type: integer
+                  description: 상위 메뉴 고유 식별자 null 입력 시 최상위 메뉴로 등록
+                title:
+                  type: string
+                  description: 메뉴 타이틀
+                description:
+                  type: string
+                  description: 메뉴 설명
+                link:
+                  type: string
+                  description: link
+                banner:
+                  type: object
+                  description: 배너 객체 parentIdx 가 Null 인 최상의 메뉴에서만 추가 가능 (DB 구조상 하위 메뉴도 가능)
+                  required:
+                    - title
+                    - description
+                    - imageUrl
+                    - link
+                  properties:
+                    title:
+                      type: string
+                      description: 배너 타이틀
+                    description:
+                      type: string
+                      description: 배너 설명
+                    imageUrl:
+                      type: string
+                      description: 배너 이미지 url
+                    link:
+                      type: string
+                      description: 배너 link
+      responses:
+        201:
+          description: CREATED
+        500:
+          $ref: '#/components/responses/ServerError'
+    get:
+      tags:
+        - Menu
+      summary: 메뉴 조회 API
+      description: 메뉴를 조회 한다.
+      security:
+        - bearerAuth: [ bearer ]
+      parameters:
+        - in: query
+          name: menuIdx
+          description: 메뉴 고유 식별자 / null or empty 전체 메뉴
+          required: false
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                required:
+                  - idx
+                  - title
+                  - description
+                properties:
+                  idx:
+                    type: integer
+                    description: 메뉴 고유 식별자
+                  parentIdx:
+                    type: integer
+                    description: 상위 메뉴 고유 식별자 null 입력 시 최상위 메뉴로 등록
+                  title:
+                    type: string
+                    description: 메뉴 타이틀
+                  description:
+                    type: string
+                    description: 메뉴 설명
+                  link:
+                    type: string
+                    description: link
+                  banner:
+                    type: object
+                    description: 배너 객체 parentIdx 가 Null 인 최상의 메뉴에서만 추가 가능 (DB 구조상 하위 메뉴도 가능)
+                    required:
+                      - title
+                      - description
+                      - imageUrl
+                      - link
+                    properties:
+                      title:
+                        type: string
+                        description: 배너 타이틀
+                      description:
+                        type: string
+                        description: 배너 설명
+                      imageUrl:
+                        type: string
+                        description: 배너 이미지 url
+                      link:
+                        type: string
+                        description: 배너 link
+      responses:
+        201:
+          description: CREATED
+        500:
+          $ref: '#/components/responses/ServerError'
+  /menu/v1/{menuIdx}:
+    put:
+      tags:
+        - Menu
+      summary: 메뉴 수정 API
+      description: 메뉴를 수정 처리 한다.
+      security:
+        - bearerAuth: [ bearer ]
+      parameters:
+        - in: path
+          name: menuIdx
+          description: 메뉴 고유 idx
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - parentIdx
+                - title
+                - description
+              properties:
+                parentIdx:
+                  type: integer
+                  description: 상위 메뉴 고유 식별자 null 입력 시 최상위 메뉴로 등록
+                title:
+                  type: string
+                  description: 메뉴 타이틀
+                description:
+                  type: string
+                  description: 메뉴 설명
+                link:
+                  type: string
+                  description: link
+                banner:
+                  type: object
+                  description: 배너 객체 parentIdx 가 Null 인 최상의 메뉴에서만 추가 가능 (DB 구조상 하위 메뉴도 가능)
+                  required:
+                    - idx
+                    - title
+                    - description
+                    - imageUrl
+                    - link
+                  properties:
+                    idx:
+                      type: integer
+                      description: 배너 idx
+                    title:
+                      type: string
+                      description: 배너 타이틀
+                    description:
+                      type: string
+                      description: 배너 설명
+                    imageUrl:
+                      type: string
+                      description: 배너 이미지 url
+                    link:
+                      type: string
+                      description: 배너 link
+                    isActive:
+                      type: boolean
+                      description: 배너 활성여부
+      responses:
+        201:
+          description: CREATED
+        500:
+          $ref: '#/components/responses/ServerError'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    ServerError:
+      description: server error.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: integer
+                description: 에러 코드
+              title:
+                type: string
+                description: 에러 제목
+              message:
+                type: string
+                description: 에러 메시지
+            required:
+              - code
+              - title
+              - message
