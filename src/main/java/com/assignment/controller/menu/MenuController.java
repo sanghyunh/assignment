@@ -19,7 +19,17 @@ import lombok.RequiredArgsConstructor;
 public class MenuController {
 
     @PostMapping("/v1")
-    public ResponseEntity<Void> signup(
+    public ResponseEntity<Void> postMenu(
+            @Valid @RequestBody MenuRequestDto requestBody,
+            BindingResult result) {
+        if (result.hasErrors()) {
+            throw new BindingException(result.getFieldError());
+        }
+        return new ResponseEntity<>(HttpStatus.CREATED);
+    }
+
+    @PostMapping("/v1")
+    public ResponseEntity<Void> getMenu(
             @Valid @RequestBody MenuRequestDto requestBody,
             BindingResult result) {
         if (result.hasErrors()) {
