@@ -16,3 +16,6 @@ spring:
   sql:
     init:
       mode: always
+
+jwt:
+  key: FB75864A-D868-11ED-A422-0A146EBA9A4E
